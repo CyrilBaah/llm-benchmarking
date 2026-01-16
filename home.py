@@ -26,3 +26,17 @@ def call_genai_model(model_name, prompt):
         tokens_used = len(response.text) // 4
     return response.text, end - start, tokens_used
 
+
+# Function to call Groq Llama model
+def call_llama_model(model_name, prompt):
+    start = time.time()
+    response = groq_client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7, 
+    )
+    end = time.time()
+    
+    response_text = response.choices[0].message.content
+    tokens_used = response.usage.total_tokens
+    return response_text, end - start, tokens_used
