@@ -40,3 +40,39 @@ def call_llama_model(model_name, prompt):
     response_text = response.choices[0].message.content
     tokens_used = response.usage.total_tokens
     return response_text, end - start, tokens_used
+
+# Sidebar for model selection
+with st.sidebar:
+    st.header("Choose your models")
+    use_genai = st.checkbox("Use GenAI Gemini-2.5-flash", value=True)
+    use_llama = st.checkbox("Use Groq Llama-3.1-8b-instant", value=True)
+    
+    prompt = st.chat_input("Enter your prompt here:")
+
+    if prompt:
+        comparisons = []
+        if use_genai:
+            comparisons.append("GenAI Gemini-2.5-flash")
+        if use_llama:
+            comparisons.append("Groq Llama-3.1-8b-instant")
+
+        cols = st.columns(len(comparisons))
+        results = []
+
+        for i, model in enumerate(comparisons):
+            with cols[i]:
+                st.subheader(comparison_name)
+                if model == "GenAI Gemini-2.5-flash":
+                    response_text, latency, tokens_used = call_genai_model(model, prompt)
+                elif model == "Groq Llama-3.1-8b-instant":
+                    response_text, latency, tokens_used = call_llama_model(model, prompt)
+            st.caption(f"Latency: {latency:.2f} seconds | Tokens used: {tokens_used}")
+            st.write(response_text)
+
+            if latency > 0:
+                results.append({
+                    "Model": model,
+                    "Latency (s)": latency,
+                    "Tokens Used": tokens_used,
+                    "Throughput (tokens/s)": tokens_used / latency
+                })
